@@ -1,89 +1,88 @@
-const fetch = require('node-fetch');
-const { JSDOM } = require('jsdom');
-const wcwidth = require('wcwidth');
+const fetch = require('node-fetch')
+const { JSDOM } = require('jsdom')
+const wcwidth = require('wcwidth')
 
 async function decodeSecretMessage(url) {
-  const content = await retrieveContent(url)
-  const table = parseContent(content)
-  const gridData = parseGridData(table)
-  printGrid(gridData)
+  const html = await retrieveHtml(url)
+  const coordinatesTable = extractCoordinatesTable(html)
+  const coordinatesGrid = buildCoordinatesGrid(coordinatesTable)
+  printGrid(coordinatesGrid)
 }
 
-function parseContent(htmlString) {
-  const { document } = (new JSDOM(htmlString)).window;
-  const table = document.querySelector('table');
-
-  if (!table) {
-    console.log('Table not found');
-    return [];
-  }
-
-  const rows = table.querySelectorAll('tr');
-  const matrix = [];
-
-  rows.forEach(row => {
-    const cells = row.querySelectorAll('td');
-    const rowArray = Array.from(cells).map(cell => cell.textContent.trim());
-    matrix.push(rowArray);
-  });
-
-  return matrix;
-}
-
-function parseGridData(data) {
-  const charMap = new Map();
-  const relevantData = data.slice(1);
-  let maxX = 0, maxY = 0;
-  relevantData.forEach(([x, value, y]) => {
-    const xNum = Number(x);
-    const yNum = Number(y);
-    if (xNum > maxX) maxX = xNum;
-    if (yNum > maxY) maxY = yNum;
-    charMap.set(`${x},${y}`, value);
-  });
-
-  const grid = Array.from({ length: maxY + 1 }, () => Array(maxX + 1).fill(' '));
-
-  charMap.forEach((value, coord) => {
-    const [x, y] = coord.split(',').map(Number);
-    grid[y][x] = value;
-  });
-
-  return grid;
-}
-
-function calculateColumnWidths(grid) {
-  return grid[0].map((_, colIndex) =>
-    Math.max(...grid.map(row => wcwidth(row[colIndex] || '')))
-  );
-}
-
-function printGrid(grid) {
-  const colWidths = calculateColumnWidths(grid);
-  grid.forEach(row => {
-    const formattedRow = row.map((cell, colIndex) =>
-      cell.padEnd(colWidths[colIndex], ' ')
-    ).join('');
-    console.log(formattedRow);
-  });
-}
-
-async function retrieveContent(url) {
+async function retrieveHtml(url) {
   try {
     const response = await fetch(url);
     if (!response.ok) {
-        throw new Error('Network response was not ok');
-    } else {
-      console.log("Content requested")
+        throw new Error(`Resonse status is: ${response.status}`)
     }
-    return await response.text();
+    return await response.text()
   } catch (error) {
-      console.error('Error fetching the document:', error);
-      return '';
-  }
+      console.error('Error fetching the document:', error)
+      throw new Error(`Error fetching the document: ${error}`)
+    }
 }
 
-decodeSecretMessage("https://docs.google.com/document/d/e/2PACX-1vSHesOf9hv2sPOntssYrEdubmMQm8lwjfwv6NPjjmIRYs_FOYXtqrYgjh85jBUebK9swPXh_a5TJ5Kl/pub")// decodeSecretMessage("https://docs.google.com/document/d/e/2PACX-1vRMx5YQlZNa3ra8dYYxmv-QIQ3YJe8tbI3kqcuC7lQiZm-CSEznKfN_HYNSpoXcZIV3Y_O3YoUB1ecq/pub")
+function extractCoordinatesTable(html) {
+  const { document } = (new JSDOM(html)).window
+  const rawCoordinatesTable = document.querySelector('table')
 
+  if (!rawCoordinatesTable) {
+    new Error('Table with coordinates not found in HTML')
+  }
 
+  let coordinatesTable = []
+  const rows = rawCoordinatesTable.querySelectorAll('tr')
+  rows.forEach(row => {
+    const cells = row.querySelectorAll('td')
+    const rowValues = Array.from(cells).map(cell => cell.textContent.trim())
+    coordinatesTable.push(rowValues)
+  });
 
+  // Dropping table headers
+  coordinatesTable = coordinatesTable.slice(1)
+  return coordinatesTable
+}
+
+function buildCoordinatesGrid(coordinatesTable) {
+  const coordinatesMap = new Map()
+  let maxX = 0, maxY = 0
+  coordinatesTable.forEach(([x, value, y]) => {
+    const xNum = Number(x)
+    const yNum = Number(y)
+    if (xNum > maxX) maxX = xNum
+    if (yNum > maxY) maxY = yNum
+    coordinatesMap.set(`${x},${y}`, value)
+  })
+
+  // Create empty GRID
+  const coordinatesGrid = Array.from({ length: maxY + 1 }, () => Array(maxX + 1).fill(' '))
+
+  coordinatesMap.forEach((value, coordinates) => {
+    const [x, y] = coordinates.split(',').map(Number)
+    coordinatesGrid[y][x] = value
+  })
+
+  return coordinatesGrid
+}
+
+function printGrid(coordinatesGrid) {
+  const colWidths = calculateColumnWidths(coordinatesGrid)
+  coordinatesGrid.forEach(row => {
+    const formattedRow = row.map((cell, colIndex) =>
+      cell.padEnd(colWidths[colIndex], ' ')
+    ).join('')
+    console.log(formattedRow)
+  })
+}
+
+function calculateColumnWidths(coordinatesGrid) {
+  if (coordinatesGrid.length === 0) {
+    new Error("Grid must not be empty")
+  }
+
+  return coordinatesGrid[0].map((_, colIndex) =>
+    Math.max(...coordinatesGrid.map(row => wcwidth(row[colIndex] || '')))
+  )
+}
+
+decodeSecretMessage("https://docs.google.com/document/d/e/2PACX-1vSHesOf9hv2sPOntssYrEdubmMQm8lwjfwv6NPjjmIRYs_FOYXtqrYgjh85jBUebK9swPXh_a5TJ5Kl/pub")

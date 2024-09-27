@@ -11,39 +11,21 @@
 //   return result;
 // };
 
-// const pairSum = (numbers, targetSum) => {
-//   let previous = {};
-  
-//   for (let i = 0; i < numbers.length; i ++) {
-//     let addend = targetSum - numbers[i];
-//     if (addend in previous) {
-//       return [previous[addend], i];
-//     }
-//     previous[numbers[i]] = i;
-//   }
-// };
+const pairSum = (numbers, targetSum) => {
+  let previous = {};
 
-// console.log(pairSum([3, 2, 5, 4, 1], 8));
+  for (let i = 0; i < numbers.length; i ++) {
+    let addend = targetSum - numbers[i];
+    if (addend in previous) {
+      return [previous[addend], i];
+    }
+    previous[numbers[i]] = i;
+  }
+};
 
-const foo = () => {
-
-  const x = 2;
-  let y = 4;
-
-  function update(arg)
-  { return Math.random() + y * arg; }
-
-  y = 2;
+console.log(pairSum([3, 2, 5, 4, 1], 8));
 
 
-  y = 3   
-
-  const result = update(x);
-
-  return result;
-}
-
-console.log(foo())
 
 
 

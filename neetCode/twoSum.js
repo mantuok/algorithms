@@ -6,6 +6,5 @@ const twoSums = (nums, target) => {
       return [previous[addend], i]
     }
     previous[nums[i]] = i;
-    console.log(previous)
   }
 };

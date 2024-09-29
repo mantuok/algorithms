@@ -1,12 +1,12 @@
 const maxProfit = (prices) => {
-  let [left, right, max] = [0, 1, 0];
-  while(right < prices.length) {
-    const canSlide = prices[right] < prices[left];
-    if (canSlide) left = right;
+  let [buyIndex, sellIndex, max] = [0, 1, 0];
+  while(sellIndex < prices.length) {
+    const canSlide = prices[sellIndex] < prices[buyIndex];
+    if (canSlide) buyIndex = sellIndex;
 
-    const window = prices[right] - prices[left];
+    const window = prices[sellIndex] - prices[buyIndex];
     max = Math.max(window, max);
-    right++;
+    sellIndex++;
   }
   return max;
 }

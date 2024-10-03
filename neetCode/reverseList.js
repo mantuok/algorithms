@@ -18,9 +18,16 @@ c.next = d;
 d.next = e;
 e.next = f;
 
-const _reverseList = (head) => {
-  let prev = null;
+const reverseList_rec = (head, prev = null) => {
+  if (head === null) return prev;
+  const next = head.next;
+  head.next = prev;
+  reverseList_rec(next, head)
+}
+
+const reverseList = (head) => {
   let current = head;
+  let prev = null;
 
   while (current != null) {
     const next = current.next;
@@ -29,14 +36,6 @@ const _reverseList = (head) => {
     current = next;
   }
 
-
-
   return prev;
-};
+}
 
-const reverseList = (head, prev = null) => {
-  if (head === null) return prev;
-  const next = head.next;
-  head.next = prev;
-  return reverseList(next, head);
-};

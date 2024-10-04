@@ -26,38 +26,7 @@ q.next = r;
 r.next = s;
 s.next = t;
 
-const __mergeLists = (head1, head2) => {
-  debugger
-  let current1 = head1;
-  let current2 = head2;
-  let tail;
-
-  if (current1.val <= current2.val) {
-    tail = current1;
-    current1 = current1.next;
-  } else {
-    tail = current2;
-    current2 = current2.next;
-  }
-  
-  while (current1 !== null && current2 !== null) {
-    if (current1.val < current2.val) {
-      tail.next = current1;
-      current1 = current1.next;
-    } else {
-      tail.next = current2;
-      current2 = current2.next;
-    }
-    tail = tail.next;
-  }
-
-  if (current1 === null) tail.next = current2;
-  if (current2 === null) tail.next = current1;
-
-  return head1.val > head2.val ? head2 : head1;
-};
-
-const _mergeLists = (head1, head2) => {
+const mergeTwoLists = (head1, head2) => {
   let current1 = head1;
   let current2 = head2;
   const dummyHead = new Node(null);
@@ -77,24 +46,23 @@ const _mergeLists = (head1, head2) => {
   if (current1 === null) tail.next = current2;
   if (current2 === null) tail.next = current1;
 
-  return dummyHead.next;
+  return dummyHead.next
 }
 
-const mergeLists = (head1, head2) => {
+const mergeTwoLists_rec = (head1, head2) => {
   if (head1 === null && head2 === null) return null;
   if (head1 === null) return head2;
   if (head2 === null) return head1;
 
   if (head1.val < head2.val) {
     const next1 = head1.next;
-    head1.next = mergeLists(next1, head2)
+    head1.next = mergeTwoLists_rec(next1, head2)
     return head1;
   } else {
     const next2 = head2.next;
-    head2.next = mergeLists(next2, head1)
+    head2.next = mergeTwoLists_rec(next2, head1)
     return head2;
   }
 }
 
-console.log(mergeLists(a, q));
-
+console.log(mergeTwoLists(a, q));

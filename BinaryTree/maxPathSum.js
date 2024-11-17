@@ -1,29 +1,16 @@
-class Node {
-  constructor(val) {
-    this.val = val;
-    this.left = null;
-    this.right = null;
-  }
-}
-
-const a = new Node(3);
-const b = new Node(11);
-const c = new Node(4);
-const d = new Node(4);
-const e = new Node(-2);
-const f = new Node(1);
-
-a.left = b;
-a.right = c;
-b.left = d;
-b.right = e;
-c.right = f;
-
 const maxPathSum = (root) => {
-  if (root === null) return null;
-  if (root.left === null && root.right === null) return root.val;
-  const maxChildPath = Math.max(maxPathSum(root.left), maxPathSum(root.right));
-  return root.val + maxChildPath;
+  var max = -Number.MAX_VALUE;
+  getMax(root);
+  return max;
+
+  function getMax (node) {
+    if (node === null) return 0;
+    const leftSum = getMax(node.left);
+    const rightSum = getMax(node.right);
+    max = Math.max(max, node.val + leftSum + rightSum);
+    return Math.max(0, node.val + leftSum, node.val + rightSum);
+  } 
 }
 
-console.log(maxPathSum(a));
+
+console.log(maxPathSum([1,2,3]));
